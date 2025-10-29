@@ -21,8 +21,10 @@ pipeline {
         stage('Deploy') {
             steps {
                 echo 'Deploying container...'
-                bat 'docker stop devops-autoapp-v2 || echo "No container to stop"'
-                bat 'docker rm devops-autoapp-v2 || echo "No container to remove"'
+                // Stop and remove previous container safely
+                bat 'docker stop devops-autoapp-v2 || exit 0'
+                bat 'docker rm devops-autoapp-v2 || exit 0'
+                // Run new container
                 bat 'docker run -d -p 7090:7090 --name devops-autoapp-v2 devops-autoapp-v2'
             }
         }
