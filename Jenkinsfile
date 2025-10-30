@@ -2,35 +2,42 @@ pipeline {
     agent any
 
     stages {
-        stage('Build') {
+        stage('Checkout Code') {
             steps {
-                echo 'Building the application...'
-                bat 'npm install'
+                echo 'Fetching source code from GitHub...'
+                checkout scm
             }
         }
 
-        stage('Test') {
+        stage('Build Backend Image') {
             steps {
-                echo 'Running tests...'
+                echo 'Building backend Docker image...'
+                bat 'docker build -t devops-autoapp-backend ./backend'
             }
         }
 
-        stage('Docker Build') {
+        stage('Build Frontend Image') {
             steps {
-                echo 'Building Docker image...'
-                bat 'docker build -t devops-autoapp-v2 .'
+                echo 'Building frontend Docker image...'
+                bat 'docker build -t devops-autoapp-frontend ./Frontend'
             }
         }
 
-        stage('Deploy') {
+        stage('Deploy Using Docker Compose') {
             steps {
-                echo 'Deploying container...'
-                // Safely stop/remove old container (ignore any error)
-                bat 'docker stop devops-autoapp-v2 || exit /b 0'
-                bat 'docker rm devops-autoapp-v2 || exit /b 0'
-                // Run new container on port 7090
-                bat 'docker run -d -p 7090:7090 --name devops-autoapp-v2 devops-autoapp-v2'
+                echo 'Deploying containers using Docker Compose...'
+                bat 'docker-compose down'
+                bat 'docker-compose up -d --build'
             }
+        }
+    }
+
+    post {
+        success {
+            echo '✅ Build and Deployment completed successfully!'
+        }
+        failure {
+            echo '❌ Build failed. Please check logs.'
         }
     }
 }
