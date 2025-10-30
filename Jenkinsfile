@@ -19,15 +19,15 @@ pipeline {
         stage('Build Frontend Image') {
             steps {
                 echo 'Building frontend Docker image...'
-                bat 'docker build -t devops-autoapp-frontend ./Frontend'
+                bat 'docker build -t devops-autoapp-frontend ./frontend'
             }
         }
 
         stage('Deploy Using Docker Compose') {
             steps {
                 echo 'Deploying containers using Docker Compose...'
-                bat 'docker-compose down'
-                bat 'docker-compose up -d --build'
+                bat 'docker-compose -f docker-compose.yml down || exit 0'
+                bat 'docker-compose -f docker-compose.yml up -d --build'
             }
         }
     }
